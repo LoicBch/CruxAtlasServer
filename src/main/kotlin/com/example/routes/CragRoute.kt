@@ -4,6 +4,7 @@ import com.example.DatabaseManager.database
 import com.example.data.model.CragDto
 import com.example.data.model.Position
 import com.example.data.model.Tables
+import com.example.utils.PositionUtil.isCloserThanThreshold
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -72,7 +73,9 @@ fun Route.crags() {
                         longitude = row[Tables.Crags.longitude] ?: 0.0,
                         thumbnailUrl = row[Tables.Crags.thumbnailUrl] ?: "0",
                     )
-                }.distinctBy { it.name }
+                }
+                .filter { isCloserThanThreshold(it, pos, threshold) }
+                .distinctBy { it.name }
 
 //            if (filter != null) {
 //                spots = spots.filter {

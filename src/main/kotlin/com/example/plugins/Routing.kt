@@ -24,7 +24,7 @@ fun Application.configureRouting(tokenService: TokenService, tokenConfig: TokenC
         }
         auth(tokenService, tokenConfig)
         user()
-        spots()
+        crags()
         utils()
     }
 }

@@ -1,10 +1,7 @@
 package com.example.utils
 
 import com.example.DatabaseManager
-import com.example.data.model.Position
-import com.example.data.model.SpotDto
-import com.example.data.model.Tables
-import com.example.data.model.dto
+import com.example.data.model.*
 import io.ktor.server.engine.*
 import org.ktorm.entity.map
 import org.ktorm.entity.sequenceOf
@@ -15,31 +12,6 @@ object PositionUtil {
     private var deltaDistance = 0.0
     private const val DISTANCE_BETWEEN_SEARCH = 50
     private const val DISTANCE_FROM_ITINERARY = 30
-
-
-     fun makeItinerary(points: List<Position>, selection: List<SpotDto>): List<SpotDto> {
-        val spotsResult: MutableList<SpotDto> = ArrayList()
-
-        points.forEachIndexed { index, point ->
-            if (index != 0) {
-                deltaDistance += distanceInKm(
-                    points[index-1].latitude,
-                    points[index-1].longitude,
-                    point.latitude,
-                    point.longitude
-                )
-
-                if (deltaDistance >= DISTANCE_BETWEEN_SEARCH) {
-                    val spotResult = selection.filter {
-                            isCloserThanThreshold(it, point, DISTANCE_FROM_ITINERARY)
-                        }
-                    spotsResult.addAll(spotResult)
-                    deltaDistance = 0.0
-                }
-            }
-        }
-        return spotsResult.distinct()
-    }
 
     private fun distanceInKm(lat: Double, long: Double, latBis: Double, longBis: Double): Double {
         val R = 6371; // Radius of the earth in km
@@ -58,7 +30,7 @@ object PositionUtil {
         return deg * (Math.PI / 180);
     }
 
-    fun isCloserThanThreshold(spot: SpotDto, pos: Position, threshold: Int): Boolean {
+    fun isCloserThanThreshold(spot: CragDto, pos: Position, threshold: Int): Boolean {
         val delta = distanceInKm(spot.latitude, spot.longitude, pos.latitude, pos.longitude)
         return delta < threshold
     }
