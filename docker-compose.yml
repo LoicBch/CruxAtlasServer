@@ -1,0 +1,40 @@
+
+version: '3'
+ 
+services:
+  database:
+    image: mysql:latest
+    container_name: database_crux_atlas
+    environment:
+      MYSQL_ROOT_PASSWORD: my_secret_password
+      MYSQL_DATABASE: app_db
+      MYSQL_USER: db_user
+      MYSQL_PASSWORD: db_user_pass
+    ports:
+      - "6033:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+#    command: [ "--init-file", "/docker-entrypoint-initdb.d/init.sql" ]
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_crux_atlas
+    links:
+      - database
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
+  # ktor_app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.Dockerfile
+  #   container_name: cruxAtlas
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #         JWT_SECRET: 368760591be1fdb7aa2b9244bde7a4edc243d1003fc23ee229fa785bcc88bbde
+volumes:
+  dbdata:

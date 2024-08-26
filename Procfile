@@ -1,0 +1,1 @@
+web: ./build/install/myurbex/bin/myurbex
