@@ -1,4 +1,4 @@
 runtime: java11
-entrypoint: 'java -jar myurbex-all.jar'
+entrypoint: 'java -jar cruxatlas-all.jar'
 env_variables:
   JWT_SECRET: 'secret'

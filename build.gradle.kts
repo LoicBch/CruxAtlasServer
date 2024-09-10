@@ -1,6 +1,3 @@
-import com.google.cloud.tools.gradle.appengine.appyaml.AppEngineAppYamlExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 val ktor_version: String by project
 val logback_version: String by project
 val kotlin_version: String by project
@@ -25,16 +22,15 @@ repositories {
 }
 
 ktor {
-
     fatJar {
-        archiveFileName.set("easy-urbex-$version-all.jar")
-//        archiveFileName.set("fat.jar")
+        archiveFileName.set("crux-atlas-$version-all.jar")
     }
+//        archiveFileName.set("fat.jar")
 
     docker {
         jreVersion.set(JavaVersion.VERSION_17)
         localImageName.set("sample-docker-image")
-        imageTag.set("0.0.1-preview")
+        imageTag.set("0.0.3-preview")
         portMappings.set(
             listOf(
                 io.ktor.plugin.features.DockerPortMapping(
@@ -47,9 +43,9 @@ ktor {
 
         externalRegistry.set(
             io.ktor.plugin.features.DockerImageRegistry.dockerHub(
-                appName = provider { "hostinger-vps" },
-                username = providers.environmentVariable("DOCKER_HUB_USERNAME"),
-                password = providers.environmentVariable("DOCKER_HUB_PASSWORD")
+                appName = provider { "vpscruxatlas" },
+                username = provider { "cruxatlas" },
+                password = provider { "Cruxatlas2024!" }
             )
         )
     }

@@ -17,6 +17,7 @@ data class UserDto(
     val username: String,
     val password: String,
     val email: String,
+    val isSubscribe: Boolean = false,
 )
 
 @Serializable

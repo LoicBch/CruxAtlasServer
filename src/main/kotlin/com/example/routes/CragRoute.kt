@@ -1,6 +1,7 @@
 package com.example.routes
 
 import com.example.DatabaseManager.database
+import com.example.data.model.CragDetailsDto
 import com.example.data.model.CragDto
 import com.example.data.model.Position
 import com.example.data.model.Tables
@@ -19,6 +20,18 @@ import org.ktorm.entity.sequenceOf
 fun Route.crags() {
 
     route("/crags") {
+
+        get("/{id}/details") {
+            val id = call.parameters["id"]!!.toInt()
+            val crag = database.sequenceOf(Tables.Crags).find { it.id eq id }
+            val cragDetails = CragDetailsDto(
+                id = crag!!.id
+            )
+
+            call.respond(
+                HttpStatusCode.OK, cragDetails
+            )
+        }
 
         get("/{id}") {
             val id = call.parameters["id"]
@@ -52,8 +65,6 @@ fun Route.crags() {
         }
 
         get {
-            val userId = call.request.queryParameters["user_id"]?.secured()
-//            val filter = call.request.queryParameters["filter"]?.secured()
             val lat = call.request.queryParameters["lat"]!!.secured().toDouble()
             val long = call.request.queryParameters["long"]!!.secured().toDouble()
             val threshold = 10

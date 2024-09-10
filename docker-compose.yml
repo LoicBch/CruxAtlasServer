@@ -27,14 +27,15 @@ services:
     restart: always
     ports:
       - 8081:80
-  # ktor_app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.Dockerfile
-  #   container_name: cruxAtlas
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #         JWT_SECRET: 368760591be1fdb7aa2b9244bde7a4edc243d1003fc23ee229fa785bcc88bbde
+  ktor_app:
+    build: .
+    context: .
+    image: cruxatlas/vpscruxatlas:0.0.1-preview
+    container_name: cruxAtlas
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+          JWT_SECRET: 368760591be1fdb7aa2b9244bde7a4edc243d1003fc23ee229fa785bcc88bbde
 volumes:
   dbdata:

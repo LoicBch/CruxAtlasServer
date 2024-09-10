@@ -14,25 +14,50 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.routing.Route
+import io.ktor.server.util.*
 import org.ktorm.dsl.*
 import org.ktorm.entity.add
 import org.ktorm.entity.find
 import org.ktorm.entity.sequenceOf
 import org.owasp.encoder.Encode
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.*
 
 
 fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
+
+    post("/users") {
+        val userVO = call.receive<UserDto>()
+
+        val user = Tables.User {
+            id = 0
+            username = userVO.username
+            password = userVO.password
+            email = userVO.email
+            creationDate = LocalDate.now()
+            lastConnection = LocalDate.now()
+        }
+
+        DatabaseManager.database.sequenceOf(Tables.Users).add(user)
+        call.respond(HttpStatusCode.Created, "Created")
+        return@post
+    }
+
+    fun String.md5(): String {
+        val bytes = MessageDigest.getInstance("MD5").digest(this.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
+    }
+
     post("/login") {
         val authRequest = call.receive<AuthRequest>()
-        val checker = PHPass(8)
 
         val user = DatabaseManager.database.sequenceOf(Tables.Users).find { it.username eq authRequest.username }
         var logMatches = false
 
         user?.let {
-            logMatches = checker.checkPassword(authRequest.password, user.password)
+            logMatches = authRequest.password.md5() == user.password
         }
 
         if (user == null || !logMatches) {
@@ -45,7 +70,7 @@ fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
         val currentDate = Date()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         val formattedDate = dateFormat.format(currentDate)
-        user.lastConnection = formattedDate
+        user.lastConnection = LocalDate.now()
         user.flushChanges()
 
         val userDto = UserDto(

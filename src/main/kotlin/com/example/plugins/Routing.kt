@@ -19,11 +19,13 @@ fun Application.configureRouting(tokenService: TokenService, tokenConfig: TokenC
         get {
             call.respond(
                 HttpStatusCode.OK,
-                "hello world"
+                "hello worldddd"
             )
         }
         auth(tokenService, tokenConfig)
         user()
+        route()
+        feed()
         crags()
         utils()
     }
