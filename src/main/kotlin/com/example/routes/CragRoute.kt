@@ -16,10 +16,21 @@ import org.ktorm.dsl.map
 import org.ktorm.dsl.select
 import org.ktorm.entity.find
 import org.ktorm.entity.sequenceOf
+import java.io.File
 
 fun Route.crags() {
 
     route("/crags") {
+
+        get("/{id}/model"){
+            val id = call.parameters["id"]!!.toInt()
+            val zipFile = File("path/to/your/compressed/folder.zip")
+            if (zipFile.exists()) {
+                call.respondFile(zipFile)
+            } else {
+                call.respond(HttpStatusCode.NotFound, "File not found")
+            }
+        }
 
         get("/{id}/details") {
             val id = call.parameters["id"]!!.toInt()
@@ -67,8 +78,9 @@ fun Route.crags() {
         get {
             val lat = call.request.queryParameters["lat"]!!.secured().toDouble()
             val long = call.request.queryParameters["long"]!!.secured().toDouble()
-            val threshold = 10
 
+//            In kilometers
+            val threshold = 30
             val pos = Position(
                 lat, long
             )

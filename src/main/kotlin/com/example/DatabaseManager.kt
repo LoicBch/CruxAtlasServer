@@ -10,16 +10,16 @@ import org.ktorm.jackson.KtormModule
 
 object DatabaseManager {
 
-    private const val host = "localhost:6033"
-    private const val dbName = "app_db"
-    private const val name = "db_user"
-    private const val pass = "db_user_pass"
-
-    //------------------------------------------------------------------------
-//    private const val host = "185.170.58.30:6033"
+//    private const val host = "localhost:6033"
 //    private const val dbName = "app_db"
 //    private const val name = "db_user"
 //    private const val pass = "db_user_pass"
+
+    //------------------------------------------------------------------------
+    private const val host = "185.170.58.30:6033"
+    private const val dbName = "app_db"
+    private const val name = "db_user"
+    private const val pass = "db_user_pass"
 
     val database: Database
 

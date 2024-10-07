@@ -17,6 +17,14 @@ data class UserDto(
     val username: String,
     val password: String,
     val email: String,
+    val country: String,
+    val city: String,
+    val age: Int,
+    val gender: String,
+    val weight: Int,
+    val height: Int,
+    val climbingSince: String,
+    val imageUrl: String?,
     val isSubscribe: Boolean = false,
 )
 

@@ -1,6 +1,5 @@
 package com.example.routes
 
-import PHPass
 import com.example.DatabaseManager
 import com.example.data.model.*
 import com.example.security.token.TokenClaim
@@ -14,28 +13,41 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.routing.Route
-import io.ktor.server.util.*
 import org.ktorm.dsl.*
 import org.ktorm.entity.add
 import org.ktorm.entity.find
 import org.ktorm.entity.sequenceOf
-import org.owasp.encoder.Encode
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.*
 
+fun String.md5(): String {
+    val bytes = MessageDigest.getInstance("MD5").digest(this.toByteArray())
+    return bytes.joinToString("") { "%02x".format(it) }
+}
 
 fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
 
     post("/users") {
         val userVO = call.receive<UserDto>()
 
+        val usernameAlreadyUsed =
+            DatabaseManager.database.sequenceOf(Tables.Users).find { it.username eq userVO.username }
+        val emailAlreadyUsed = DatabaseManager.database.sequenceOf(Tables.Users).find { it.email eq userVO.email }
+
+        if (usernameAlreadyUsed != null || emailAlreadyUsed != null) {
+            val message = if (usernameAlreadyUsed != null) "username already used" else "email already used"
+            call.respond(HttpStatusCode.Unauthorized, ErrorMessage(message))
+            return@post
+        }
+
         val user = Tables.User {
             id = 0
             username = userVO.username
-            password = userVO.password
+            password = userVO.password.md5()
             email = userVO.email
+            imageUrl = ""
             creationDate = LocalDate.now()
             lastConnection = LocalDate.now()
         }
@@ -45,10 +57,7 @@ fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
         return@post
     }
 
-    fun String.md5(): String {
-        val bytes = MessageDigest.getInstance("MD5").digest(this.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
-    }
+
 
     post("/login") {
         val authRequest = call.receive<AuthRequest>()
@@ -62,7 +71,7 @@ fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
 
         if (user == null || !logMatches) {
             call.respond(
-                HttpStatusCode.Unauthorized, ErrorResponse("username or password incorrect")
+                HttpStatusCode.Unauthorized, ErrorMessage("username or password incorrect")
             )
             return@post
         }
@@ -77,7 +86,15 @@ fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
             user.id!!,
             user.username,
             user.password,
-            user.email
+            user.email,
+            user.country,
+            user.city,
+            user.age,
+            user.gender,
+            user.weight,
+            user.height,
+            user.climbingSince.toString(),
+            user.imageUrl
         )
 
         call.respond(
@@ -94,10 +111,18 @@ fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
                 user.id!!,
                 user.username,
                 user.password,
-                user.email
+                user.email,
+                user.country,
+                user.city,
+                user.age,
+                user.gender,
+                user.weight,
+                user.height,
+                user.climbingSince.toString(),
+                user.imageUrl
             )
 
-            call.respond(HttpStatusCode.OK, user)
+            call.respond(HttpStatusCode.OK, userDto)
         }
     }
 }

@@ -19,7 +19,7 @@ fun Route.feed() {
     route("/feed"){
         get {
             val page = call.request.queryParameters["page"]!!.secured().toInt()
-            val pageSize = 6
+            val pageSize = 3
             val skip = (page - 1) * pageSize
 
             val feeds = database.from(Tables.NewItems)

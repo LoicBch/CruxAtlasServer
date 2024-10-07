@@ -19,9 +19,10 @@ fun Application.configureRouting(tokenService: TokenService, tokenConfig: TokenC
         get {
             call.respond(
                 HttpStatusCode.OK,
-                "hello worldddd"
+                "hello world 0.0.5"
             )
         }
+
         auth(tokenService, tokenConfig)
         user()
         route()
