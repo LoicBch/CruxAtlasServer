@@ -1,17 +1,19 @@
 package com.example.routes
 
-import com.example.DatabaseManager
 import com.example.DatabaseManager.database
 import com.example.data.model.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.routing.Route
 import org.apache.commons.mail.DefaultAuthenticator
 import org.apache.commons.mail.SimpleEmail
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
+import java.io.File
 import java.time.LocalDate
 import java.util.*
 
@@ -26,12 +28,22 @@ fun Route.user() {
                     set(it.age, userVO.age)
                     set(it.city, userVO.city)
                     set(it.country, userVO.country)
-                    set(it.climbingSince, LocalDate.parse(userVO.climbingSince))
+                    if (userVO.climbingSince == "") {
+                        set(it.climbingSince, null)
+                    } else {
+                        set(it.climbingSince, LocalDate.parse(userVO.climbingSince))
+                    }
                     set(it.email, userVO.email)
                     set(it.height, userVO.height)
                     set(it.weight, userVO.weight)
                     set(it.gender, userVO.gender)
-                    set(it.imageUrl, userVO.imageUrl)
+
+                    if (userVO.imageUrl == null) {
+                        set(it.imageUrl, "")
+                    } else {
+                        set(it.imageUrl, userVO.imageUrl)
+                    }
+
                     where {
                         it.username eq userVO.username
                     }
@@ -65,6 +77,23 @@ fun Route.user() {
             return@get
         }
 
+        post("/{id}/photo") {
+            val userId = call.parameters["id"]!!.toInt()
+            val user = database.sequenceOf(Tables.Users).find { it.id eq userId }!!
+            val multipart = call.receiveMultipart()
+            var fileName: String? = null
+// save elsewhere
+            multipart.forEachPart { part ->
+                if (part is PartData.FileItem) {
+                    fileName = part.originalFileName as String
+                    val fileBytes = part.streamProvider().readBytes()
+                    File("uploads/$fileName").writeBytes(fileBytes)
+                }
+                part.dispose()
+            }
+            return@post
+        }
+
         post("/{id}/route/log") {
             val routeId = call.request.queryParameters["route_id"]!!.secured().toInt()
             val userId = call.parameters["user_id"]!!.secured().toInt()
@@ -84,38 +113,65 @@ fun Route.user() {
         get("/{id}/routesLogs") {
             val userId = call.parameters["user_id"]?.toInt()!!
 
-            val routeLog = database.sequenceOf(Tables.RouteLogs).filter { it.userId eq userId }.toList().map {
-                RouteLog(
-                    it.id,
-                    it.userId,
-                    it.routeId,
-                    it.text,
-                    it.rating,
-                    it.date.toString()
+            val routeWithLog = database.sequenceOf(Tables.RouteLogs).filter { it.userId eq userId }.map { routeLog ->
+                val route = database.sequenceOf(Tables.Routes).find { it.id eq routeLog.routeId }!!
+
+                RouteLogWithRoute(
+                    RouteLog(
+                        routeLog.id,
+                        routeLog.userId,
+                        routeLog.routeId,
+                        routeLog.routeName,
+                        routeLog.text,
+                        routeLog.rating,
+                        routeLog.date.toString()
+                    ),
+                    com.example.data.model.Route(
+                        route.id,
+                        route.cragId,
+                        route.cragName,
+                        route.sectorId,
+                        route.name,
+                        route.grade,
+                    )
                 )
             }
 
             call.respond(
-                HttpStatusCode.OK, routeLog
+                HttpStatusCode.OK, routeWithLog
             )
         }
 
         get("/{id}/boulderLogs") {
             val userId = call.parameters["user_id"]?.toInt()!!
 
-            val boulderLog = database.sequenceOf(Tables.BoulderLogs).filter { it.userId eq userId }.toList().map {
-                BoulderLog(
-                    it.id,
-                    it.userId,
-                    it.boulderId,
-                    it.text,
-                    it.rating,
-                    it.logDate.toString()
-                )
-            }
+            val boulderWithLog =
+                database.sequenceOf(Tables.BoulderLogs).filter { it.userId eq userId }.map { boulderLog ->
+                    val route = database.sequenceOf(Tables.Routes).find { it.id eq boulderLog.id }!!
+
+                    BoulderLogWithBoulder(
+                        BoulderLog(
+                            boulderLog.id,
+                            boulderLog.userId,
+                            boulderLog.boulderId,
+                            boulderLog.boulderName,
+                            boulderLog.text,
+                            boulderLog.rating,
+                            boulderLog.logDate.toString()
+                        ),
+                        Boulder(
+                            route.id,
+                            route.cragId,
+                            route.cragName,
+                            route.sectorId,
+                            route.name,
+                            route.grade,
+                        )
+                    )
+                }
 
             call.respond(
-                HttpStatusCode.OK, boulderLog
+                HttpStatusCode.OK, boulderWithLog
             )
         }
 

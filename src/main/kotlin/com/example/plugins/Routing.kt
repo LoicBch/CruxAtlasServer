@@ -19,7 +19,7 @@ fun Application.configureRouting(tokenService: TokenService, tokenConfig: TokenC
         get {
             call.respond(
                 HttpStatusCode.OK,
-                "hello world 0.0.5"
+                "hello world 0.0.6"
             )
         }
 

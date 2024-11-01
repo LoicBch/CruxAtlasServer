@@ -30,7 +30,7 @@ ktor {
     docker {
         jreVersion.set(JavaVersion.VERSION_17)
         localImageName.set("sample-docker-image")
-        imageTag.set("0.0.5")
+        imageTag.set("0.0.6")
         portMappings.set(
             listOf(
                 io.ktor.plugin.features.DockerPortMapping(
@@ -50,16 +50,6 @@ ktor {
         )
     }
 }
-
-//configure<AppEngineAppYamlExtension> {
-//    stage {
-//        setArtifact("build/libs/${project.name}-all.jar")
-//    }
-//    deploy {
-//        version = "GCLOUD_CONFIG"
-//        projectId = "GCLOUD_CONFIG"
-//    }
-//}
 
 dependencies {
 

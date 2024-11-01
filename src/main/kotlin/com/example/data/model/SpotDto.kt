@@ -1,15 +1,6 @@
 package com.example.data.model
 
-import com.example.DatabaseManager
-import io.konform.validation.Validation
-import io.konform.validation.ValidationResult
-import io.konform.validation.jsonschema.maxLength
-import io.konform.validation.jsonschema.minLength
 import kotlinx.serialization.Serializable
-import org.ktorm.dsl.and
-import org.ktorm.dsl.eq
-import org.ktorm.entity.find
-import org.ktorm.entity.sequenceOf
 
 @Serializable
 data class UserDto(
@@ -52,6 +43,8 @@ data class SectorDto(
     val id: Int,
     val cragId: String,
     val name: String,
+    val routes: List<RouteDto>,
+    val parkingSpots: List<ParkingDto>
 )
 
 @Serializable
@@ -64,8 +57,17 @@ data class AreaDto(
 @Serializable
 data class RouteDto(
     val id: Int,
-    val cragId: String,
-    val sectorId: String,
+    val cragId: Int,
+    val sectorId: Int,
     val name: String,
-    val grade: Double,
+    val grade: String,
+)
+
+@Serializable
+data class ParkingDto(
+    val id: Int,
+    val sectorId: Int,
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
 )

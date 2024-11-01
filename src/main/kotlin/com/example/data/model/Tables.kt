@@ -26,6 +26,7 @@ object Tables {
         val id = int("id").primaryKey().bindTo { it.id }
         val userId = int("user_id").primaryKey().bindTo { it.userId }
         val routeId = int("route_id").bindTo { it.routeId }
+        val routeName = varchar("route_name").bindTo { it.routeName }
         val text = varchar("text").bindTo { it.text }
         val rating = varchar("rating").bindTo { it.rating }
         val date = date("log_date").bindTo { it.date }
@@ -37,6 +38,7 @@ object Tables {
         var id: Int
         var userId: Int
         var routeId: Int
+        var routeName: String
         var text: String
         var rating: String
         var date: LocalDate
@@ -46,6 +48,7 @@ object Tables {
         val id = int("id").primaryKey().bindTo { it.id }
         val userId = int("user_id").primaryKey().bindTo { it.userId }
         val boulderId = int("boulder_id").bindTo { it.boulderId }
+        val boulderName = varchar("boulder_name").bindTo { it.boulderName }
         val text = varchar("text").bindTo { it.text }
         val rating = varchar("rating").bindTo { it.rating }
         val logDate = date("log_date").bindTo { it.logDate }
@@ -57,6 +60,7 @@ object Tables {
         val id: Int
         var userId: Int
         var boulderId: Int
+        var boulderName: String
         var text: String
         var rating: String
         var logDate: LocalDate
@@ -97,26 +101,26 @@ object Tables {
 //        val routeId = int("route_id").bindTo { it.routeId }
 //    }
 
-    interface UserLogRoute : Entity<UserLogRoute> {
-        companion object : Entity.Factory<UserLogRoute>()
-
-        var id: Int
-        var userId: Int
-        var routeId: Int
-    }
+//    interface UserLogRoute : Entity<UserLogRoute> {
+//        companion object : Entity.Factory<UserLogRoute>()
+//
+//        var id: Int
+//        var userId: Int
+//        var routeId: Int
+//    }
 
     object Users : Table<User>("users") {
         val id = int("id").primaryKey().bindTo { it.id }
         val username = varchar("username").bindTo { it.username }
         val password = varchar("password").bindTo { it.password }
         val email = varchar("email").bindTo { it.email }
-        val country = varchar("country").bindTo { it.email }
-        val city = varchar("city").bindTo { it.email }
-        val age = varchar("age").bindTo { it.email }
-        val gender = varchar("gender").bindTo { it.email }
-        val height = varchar("height").bindTo { it.email }
-        val weight = varchar("weight").bindTo { it.email }
-        val climbingSince = varchar("climbing_since").bindTo { it.email }
+        val country = varchar("country").bindTo { it.country }
+        val city = varchar("city").bindTo { it.city }
+        val age = int("age").bindTo { it.age }
+        val gender = varchar("gender").bindTo { it.gender }
+        val height = int("height").bindTo { it.height }
+        val weight = int("weight").bindTo { it.weight }
+        val climbingSince = date("climbing_since").bindTo { it.climbingSince }
         val imageUrl = varchar("image_url").bindTo { it.imageUrl }
         val creation_date = date("creation_date").bindTo { it.creationDate }
         val lastConnection = date("last_connexion").bindTo { it.lastConnection }
@@ -135,7 +139,7 @@ object Tables {
         var gender: String
         var height: Int
         var weight: Int
-        var climbingSince: LocalDate
+        var climbingSince: LocalDate?
         var imageUrl: String?
         var creationDate: LocalDate
         var lastConnection: LocalDate
@@ -190,28 +194,55 @@ object Tables {
         var country: String
     }
 
+    object Parkings : Table<Parking>("parking_spots") {
+        val id = int("id").primaryKey().bindTo { it.id }
+        val sectorId = int("sector_id").bindTo { it.sectorId }
+        val name = varchar("name").bindTo { it.name }
+        val latitude = double("latitude").bindTo { it.latitude }
+        val longitude = double("longitude").bindTo { it.longitude }
+    }
+
+    interface Parking : Entity<Parking> {
+        companion object : Entity.Factory<Parking>()
+
+        val id: Int
+        var sectorId: Int
+        var name: String
+        var latitude: Double
+        var longitude: Double
+    }
+
     object Routes : Table<Route>("routes") {
         val id = int("id").primaryKey().bindTo { it.id }
-        val cragId = varchar("crag_id").bindTo { it.cragId }
-        val sectorId = varchar("sector_id").bindTo { it.sectorId }
+        val cragId = int("crag_id").bindTo { it.cragId }
+        val cragName = varchar("crag_name").bindTo { it.cragName }
+        val sectorId = int("sector_id").bindTo { it.sectorId }
         val name = varchar("name").bindTo { it.name }
         val grade = varchar("grade").bindTo { it.grade }
+        val sectorName = varchar("sector_name").bindTo { it.sectorName }
+        val ascents = int("ascents").bindTo { it.ascents }
+        val rating = float("rating").bindTo { it.rating }
     }
 
     interface Route : Entity<Route> {
         companion object : Entity.Factory<Route>()
 
         val id: Int
-        var cragId: String
-        var sectorId: String
+        var cragId: Int
+        var cragName: String
+        var sectorId: Int
         var name: String
         var grade: String
+        var sectorName : String
+        var ascents : Int
+        var rating : Float
     }
 
     object Boulders : Table<Boulder>("boulders") {
         val id = int("id").primaryKey().bindTo { it.id }
-        val cragId = varchar("crag_id").bindTo { it.cragId }
-        val sectorId = varchar("sector_id").bindTo { it.sectorId }
+        val cragId = int("crag_id").bindTo { it.cragId }
+        val cragName = varchar("crag_name").bindTo { it.cragName }
+        val sectorId = int("sector_id").bindTo { it.sectorId }
         val name = varchar("name").bindTo { it.name }
         val grade = varchar("grade").bindTo { it.grade }
     }
@@ -220,8 +251,9 @@ object Tables {
         companion object : Entity.Factory<Boulder>()
 
         val id: Int
-        var cragId: String
-        var sectorId: String
+        var cragId: Int
+        var cragName: String
+        var sectorId: Int
         var name: String
         var grade: String
     }
