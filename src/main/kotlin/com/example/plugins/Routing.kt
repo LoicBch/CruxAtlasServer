@@ -19,7 +19,7 @@ fun Application.configureRouting(tokenService: TokenService, tokenConfig: TokenC
         get {
             call.respond(
                 HttpStatusCode.OK,
-                "hello world 0.0.6"
+                "hello world 0.0.13"
             )
         }
 
@@ -27,7 +27,9 @@ fun Application.configureRouting(tokenService: TokenService, tokenConfig: TokenC
         user()
         route()
         feed()
+        models()
         crags()
+        areas()
         utils()
     }
 }

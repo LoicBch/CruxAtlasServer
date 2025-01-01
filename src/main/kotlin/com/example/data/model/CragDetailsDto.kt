@@ -10,5 +10,6 @@ class CragDetailsDto(
     val longitude: Double,
     val thumbnailUrl: String,
     val sectors: List<SectorDto>,
-    )
+    val models: List<ModelDto>
+)
 

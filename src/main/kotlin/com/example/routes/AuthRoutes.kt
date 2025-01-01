@@ -2,6 +2,7 @@ package com.example.routes
 
 import com.example.DatabaseManager
 import com.example.data.model.*
+import com.example.data.model.Tables.BoulderLogs.userId
 import com.example.security.token.TokenClaim
 import com.example.security.token.TokenConfig
 import com.example.security.token.TokenService
@@ -14,9 +15,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.routing.Route
 import org.ktorm.dsl.*
-import org.ktorm.entity.add
-import org.ktorm.entity.find
-import org.ktorm.entity.sequenceOf
+import org.ktorm.dsl.map
+import org.ktorm.entity.*
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -78,6 +78,10 @@ fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
         val token = tokenService.generate(tokenConfig, TokenClaim("user_id", user.id.toString()))
         val currentDate = Date()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+        val favoritesIds = DatabaseManager.database.sequenceOf(Tables.UserFavCrags).filter {
+            it.userId eq (user.id?.toInt()
+                ?: -1)
+        }.map { it.cragId }
         val formattedDate = dateFormat.format(currentDate)
         user.lastConnection = LocalDate.now()
         user.flushChanges()
@@ -94,7 +98,8 @@ fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
             user.weight,
             user.height,
             user.climbingSince.toString(),
-            user.imageUrl
+            user.imageUrl,
+            favorites = favoritesIds
         )
 
         call.respond(
@@ -106,6 +111,9 @@ fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
         get("/authenticate") {
             val principal = call.principal<JWTPrincipal>()
             val userId = principal?.getClaim("user_id", String::class)
+            val favoritesIds =
+                DatabaseManager.database.sequenceOf(Tables.UserFavCrags).filter { it.userId eq userId!!.toInt() }
+                    .map { it.cragId }
             val user = DatabaseManager.database.sequenceOf(Tables.Users).find { it.id eq userId!!.toInt() }!!
             val userDto = UserDto(
                 user.id!!,
@@ -119,7 +127,8 @@ fun Route.auth(tokenService: TokenService, tokenConfig: TokenConfig) {
                 user.weight,
                 user.height,
                 user.climbingSince.toString(),
-                user.imageUrl
+                user.imageUrl,
+                favorites = favoritesIds
             )
 
             call.respond(HttpStatusCode.OK, userDto)

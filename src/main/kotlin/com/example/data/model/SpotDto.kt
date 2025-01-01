@@ -17,6 +17,7 @@ data class UserDto(
     val climbingSince: String,
     val imageUrl: String?,
     val isSubscribe: Boolean = false,
+    val favorites: List<Int> = emptyList()
 )
 
 @Serializable
@@ -52,6 +53,7 @@ data class AreaDto(
     val id: Int,
     val name: String,
     val country: String,
+    val polygon: List<Position>
 )
 
 @Serializable

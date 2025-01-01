@@ -166,6 +166,36 @@ object Tables {
         var thumbnailUrl: String
     }
 
+    object Models : Table<Model>("models") {
+        val id = int("id").primaryKey().bindTo { it.id }
+        val parentCragId = int("parentCragId").bindTo { it.parentCragId }
+        val name = varchar("name").bindTo { it.name }
+        val routeCount = int("routesCount").bindTo { it.routeCount }
+    }
+
+    interface Model : Entity<Model> {
+        companion object : Entity.Factory<Model>()
+
+        val id: Int
+        var parentCragId: Int
+        var name: String
+        var routeCount: Int
+    }
+
+    object ModelHasSectors : Table<ModelHasSector>("model_has_sector") {
+        val id = int("id").primaryKey().bindTo { it.id }
+        val sectorId = int("sector_id").bindTo { it.sectorId }
+        val modelId = int("model_id").bindTo { it.modelId }
+    }
+
+    interface ModelHasSector : Entity<ModelHasSector> {
+        companion object : Entity.Factory<ModelHasSector>()
+
+        val id: Int
+        var sectorId: Int
+        var modelId: Int
+    }
+
     object Sectors : Table<Sector>("sectors") {
         val id = int("id").primaryKey().bindTo { it.id }
         val cragId = varchar("crag_id").bindTo { it.cragId }
@@ -184,6 +214,7 @@ object Tables {
         val id = int("id").primaryKey().bindTo { it.id }
         val name = varchar("name").bindTo { it.name }
         val country = varchar("country").bindTo { it.country }
+        val polygon = varchar("polygon").bindTo { it.polygon }
     }
 
     interface Area : Entity<Area> {
@@ -192,6 +223,7 @@ object Tables {
         val id: Int
         var name: String
         var country: String
+        var polygon: String
     }
 
     object Parkings : Table<Parking>("parking_spots") {
@@ -233,9 +265,9 @@ object Tables {
         var sectorId: Int
         var name: String
         var grade: String
-        var sectorName : String
-        var ascents : Int
-        var rating : Float
+        var sectorName: String
+        var ascents: Int
+        var rating: Float
     }
 
     object Boulders : Table<Boulder>("boulders") {

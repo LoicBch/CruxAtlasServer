@@ -192,7 +192,7 @@ fun Route.user() {
             val userId = call.parameters["id"]!!.secured().toInt()
 
             val favRelation = Tables.UserFavCrag {
-                this.cragId = call.request.queryParameters["spot_id"]!!.secured().toInt()
+                this.cragId = call.request.queryParameters["crag_id"]!!.secured().toInt()
                 this.userId = userId
             }
             database.sequenceOf(Tables.UserFavCrags).add(favRelation)
@@ -206,7 +206,7 @@ fun Route.user() {
 
         delete("/{id}/favorite") {
             val userId = call.parameters["id"]?.secured()?.toInt()!!
-            val spotId = call.request.queryParameters["spot_id"]?.secured()?.toInt()!!
+            val spotId = call.request.queryParameters["crag_id"]?.secured()?.toInt()!!
             database.sequenceOf(Tables.UserFavCrags).removeIf { (it.userId eq userId) and (it.spotId eq spotId) }
 
             val spotsIds = database.from(Tables.UserFavCrags).select(Tables.UserFavCrags.spotId)

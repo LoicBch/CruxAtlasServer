@@ -16,19 +16,48 @@ import org.ktorm.dsl.*
 import org.ktorm.entity.find
 import org.ktorm.entity.sequenceOf
 import java.io.File
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 fun Route.crags() {
 
     route("/crags") {
+        get("/area/{id}") {
 
-        get("/{id}/model") {
             val id = call.parameters["id"]!!.toInt()
-            val zipFile = File("path/to/your/compressed/folder.zip")
-            if (zipFile.exists()) {
-                call.respondFile(zipFile)
-            } else {
-                call.respond(HttpStatusCode.NotFound, "File not found")
-            }
+            val area = database.sequenceOf(Tables.Areas).find { it.id eq id }
+            val crags = database.from(Tables.Crags).select(Tables.Crags.columns).where {
+                Tables.Crags.areaId eq area!!.id.toString()
+            }.map { row ->
+                CragDto(
+                    id = row[Tables.Crags.id] ?: 0,
+                    areaId = row[Tables.Crags.areaId] ?: "0",
+                    name = row[Tables.Crags.name] ?: "0",
+                    latitude = row[Tables.Crags.latitude] ?: 0.0,
+                    longitude = row[Tables.Crags.longitude] ?: 0.0,
+                    thumbnailUrl = row[Tables.Crags.thumbnailUrl] ?: "0",
+                )
+            }.distinctBy { it.name }
+
+            call.respond(
+                HttpStatusCode.OK, crags
+            )
+        }
+
+        get("/all") {
+            val crags = database.from(Tables.Crags).select(Tables.Crags.columns).map { row ->
+                CragDto(
+                    id = row[Tables.Crags.id] ?: 0,
+                    areaId = row[Tables.Crags.areaId] ?: "0",
+                    name = row[Tables.Crags.name] ?: "0",
+                    latitude = row[Tables.Crags.latitude] ?: 0.0,
+                    longitude = row[Tables.Crags.longitude] ?: 0.0,
+                    thumbnailUrl = row[Tables.Crags.thumbnailUrl] ?: "0",
+                )
+            }.distinctBy { it.name }
+            call.respond(
+                HttpStatusCode.OK, crags
+            )
         }
 
         get("/{id}/details") {
@@ -40,7 +69,7 @@ fun Route.crags() {
 
                 val parkings = database.from(Tables.Parkings).select(Tables.Parkings.columns).where {
                     Tables.Parkings.sectorId eq sectorRows[Tables.Sectors.id]!!
-                }.map {parkingRows ->
+                }.map { parkingRows ->
                     ParkingDto(
                         id = parkingRows[Tables.Parkings.id] ?: 0,
                         sectorId = parkingRows[Tables.Parkings.sectorId] ?: 0,
@@ -71,6 +100,27 @@ fun Route.crags() {
                 )
             }
 
+            val models = database.from(Tables.Models).select(Tables.Models.columns).where {
+                Tables.Models.parentCragId eq crag!!.id
+            }.map { modelRows ->
+
+                val sectorNames = database.from(Tables.ModelHasSectors).select(Tables.ModelHasSectors.columns).where {
+                    Tables.ModelHasSectors.modelId eq modelRows[Tables.Models.id]!!
+                }.map { modelHasSectorRows ->
+                    val sector = database.sequenceOf(Tables.Sectors)
+                        .find { it.id eq modelHasSectorRows[Tables.ModelHasSectors.sectorId]!! }
+                    sector!!.name
+                }
+
+                ModelDto(
+                    id = modelRows[Tables.Models.id].toString(),
+                    parentCrag = modelRows[Tables.Models.parentCragId].toString(),
+                    name = modelRows[Tables.Models.name] ?: "0",
+                    sectorNames = sectorNames,
+                    routesCount = modelRows[Tables.Models.routeCount] ?: 0
+                )
+            }
+
             val cragDetails = CragDetailsDto(
                 id = crag!!.id,
                 name = crag.name,
@@ -78,6 +128,7 @@ fun Route.crags() {
                 longitude = crag.longitude,
                 thumbnailUrl = crag.thumbnailUrl,
                 sectors = cragSectors,
+                models = models
             )
 
             call.respond(
@@ -127,20 +178,16 @@ fun Route.crags() {
                 lat, long
             )
 
-            val crags = database.from(Tables.Crags)
-                .select(Tables.Crags.columns)
-                .map { row ->
-                    CragDto(
-                        id = row[Tables.Crags.id] ?: 0,
-                        areaId = row[Tables.Crags.areaId] ?: "0",
-                        name = row[Tables.Crags.name] ?: "0",
-                        latitude = row[Tables.Crags.latitude] ?: 0.0,
-                        longitude = row[Tables.Crags.longitude] ?: 0.0,
-                        thumbnailUrl = row[Tables.Crags.thumbnailUrl] ?: "0",
-                    )
-                }
-                .filter { isCloserThanThreshold(it, pos, threshold) }
-                .distinctBy { it.name }
+            val crags = database.from(Tables.Crags).select(Tables.Crags.columns).map { row ->
+                CragDto(
+                    id = row[Tables.Crags.id] ?: 0,
+                    areaId = row[Tables.Crags.areaId] ?: "0",
+                    name = row[Tables.Crags.name] ?: "0",
+                    latitude = row[Tables.Crags.latitude] ?: 0.0,
+                    longitude = row[Tables.Crags.longitude] ?: 0.0,
+                    thumbnailUrl = row[Tables.Crags.thumbnailUrl] ?: "0",
+                )
+            }.filter { isCloserThanThreshold(it, pos, threshold) }.distinctBy { it.name }
 
 //            if (filter != null) {
 //                spots = spots.filter {
